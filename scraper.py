@@ -26,6 +26,36 @@ URL_LOGIN = "http://datalogger.capnuocnhabe.vn"
 URL_LOGGER = "http://113.161.69.85:1802/Consumer/Logger/Daily_Monthly.aspx"
 START_DATE = '01/01/2017'
 END_DATE   = '18/01/2017'
+XNTD = ["39 Ben Van Don",
+        "65 BEN VAN DON",
+        "90 BEN VAN DON",
+        "BEN VAN DON_NGUYEN KHOAI",
+        "CALMETTE - BEN VAN DON",
+        "CAU HIEP PHUOC",
+        "CAU RACH ONG 1",
+        "Cau Rach Ong 2",
+        "CAU TAC BEN RO",
+        "CTY PT CN TAN THUAN",
+        "D1000 Huynh Tan Phat",
+        "D300 Cau Ba Chiem",
+        "D600 Cau Ong Lon",
+        "D600 NVLinh_NHTho",
+        "KCN HIEP PHUOC",
+        "KCX TThuan",
+        "LONG THOI - NHON DUC",
+        "NGUYEN BINH",
+        "NHTho_PHLau",
+        "NVLinh_NLBang",
+        "VUON UOM BOO",
+        "Vuon uom Tan Thuan",
+        "D1000 Huynh Tan Phat (ĐC)",
+        "D300 Cau Ba Chiem (ĐC)",
+        "D600 NVLinh_NHTho (ĐC)",
+        "NHTho_PHLau (ĐC)",
+        "NVLinh_NLBang (ĐC)",
+        "Vuon uom BOO (ĐC)",
+        "Vuon uom Tan Thuan (ĐC)",
+]
 
 
 def site_log_in(driver):
