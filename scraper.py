@@ -23,6 +23,10 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " + \
 URL_LOGIN = "http://datalogger.capnuocnhabe.vn"
 # URL_LOGIN = "http://113.161.69.85:1802/Login.aspx"
 
+URL_LOGGER = "http://113.161.69.85:1802/Consumer/Logger/Daily_Monthly.aspx"
+START_DATE = '01/01/2017'
+END_DATE   = '18/01/2017'
+
 
 def site_log_in(driver):
     # METHOD 1
@@ -68,6 +72,24 @@ def main():
     wait.until(EC.presence_of_all_elements_located((By.ID, "RAD_SLIDING_PANE_TEXT_RadSlidingPane2")))
     driver.maximize_window()
 
+    # Now that you are logged in, go to the page of interest
+    driver.get(URL_LOGGER)
+    wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_ucDailyReportConsumer_btnView_input")))
+
+    element = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_dtmStart_dateInput']")
+    element.clear()
+    element.send_keys(START_DATE)
+
+    element = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_dtmEnd_dateInput']")
+    element.clear()
+    element.send_keys(END_DATE)
+
+    element = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_btnView_input']")
+    element.click()
+
+    wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_ucDailyReportConsumer_grv_ctl00")))
+
+    # driver.maximize_window()
     driver.save_screenshot('screen_shoot.png')
     driver.close()
 
