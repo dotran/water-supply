@@ -5,6 +5,7 @@ import platform
 import time
 # from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -48,13 +49,13 @@ XNTD = ["39 Ben Van Don",
         "NVLinh_NLBang",
         "VUON UOM BOO",
         "Vuon uom Tan Thuan",
-        "D1000 Huynh Tan Phat (ĐC)",
-        "D300 Cau Ba Chiem (ĐC)",
-        "D600 NVLinh_NHTho (ĐC)",
-        "NHTho_PHLau (ĐC)",
-        "NVLinh_NLBang (ĐC)",
-        "Vuon uom BOO (ĐC)",
-        "Vuon uom Tan Thuan (ĐC)",
+        "D1000 Huynh Tan Phat (ÐC)",
+        "D300 Cau Ba Chiem (ÐC)",
+        "D600 NVLinh_NHTho (ÐC)",
+        "NHTho_PHLau (ÐC)",
+        "NVLinh_NLBang (ÐC)",
+        "Vuon uom BOO (ÐC)",
+        "Vuon uom Tan Thuan (ÐC)",
 ]
 
 
@@ -89,6 +90,28 @@ def site_log_in(driver):
     # login_btn.click()
 
 
+def get_locations_list(driver):
+    """Return the list of all locations/meters available in the dropdown.
+    """
+    elem = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']")
+    elem.click()
+    elem.send_keys(Keys.ARROW_DOWN + Keys.ARROW_UP + Keys.ENTER)
+
+    locations = []
+    while True:
+        val = driver.find_element_by_xpath(
+            "//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_ClientState']")\
+            .get_attribute("value")
+        # print(val)
+        loc = val.split(',')[1].split(':')[1].strip('"')
+        if locations and loc == locations[-1]:
+            break
+        locations.append(loc)
+        elem.send_keys(Keys.ARROW_DOWN + Keys.ENTER)
+    print(locations)
+    return locations
+
+
 def main():
     # Use PhantomJS to browse the page
     caps = webdriver.DesiredCapabilities.PHANTOMJS
@@ -114,10 +137,116 @@ def main():
     element.clear()
     element.send_keys(END_DATE)
 
-    element = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_btnView_input']")
-    element.click()
+    locations = get_locations_list(driver)
+    for i in locations:
+        print(i)
 
-    wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_ucDailyReportConsumer_grv_ctl00")))
+
+
+    # driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']").click()
+    # driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']").send_keys(Keys.ARROW_DOWN + Keys.ARROW_UP + Keys.ENTER)
+    #
+    # locations = []
+    # while True:
+    #     val = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_ClientState']").get_attribute("value")
+    #     # print(val)
+    #     loc = val.split(',')[1].split(':')[1].strip('"')
+    #     if locations and loc == locations[-1]:
+    #         break
+    #     locations.append(loc)
+    #     driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']").send_keys(Keys.ARROW_DOWN + Keys.ENTER)
+    # # print(locations)
+
+
+        # driver.save_screenshot('screen_shoot_1.png')
+        # driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']").send_keys(Keys.ARROW_DOWN + Keys.ENTER)
+        # driver.save_screenshot('screen_shoot_2.png')
+        # driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']").send_keys(Keys.ARROW_DOWN + Keys.ENTER)
+        # driver.save_screenshot('screen_shoot_3.png')
+        # driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']").send_keys(Keys.ARROW_DOWN + Keys.ENTER)
+        # driver.save_screenshot('screen_shoot_4.png')
+
+        # # Extract the list of meters/locations from the dropdown
+        # # for li in driver.find_elements_by_css_selector("li.rcbItem.rcbTemplate"):
+        # ul = driver.find_element_by_xpath(
+        #     "//div[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown']/div[2]/ul")
+        # for li in ul.find_elements_by_css_selector("li.rcbItem.rcbTemplate"):
+        #     cell = li.find_elements_by_tag_name("td")[0]
+        #     print(cell)
+        #     print(cell.text)
+        # # ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown > div.rcbScroll.rcbWidth > ul > li:nth-child(1)
+        # # // *[ @ id = "ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown"] / div[2] / ul / li[1]
+
+
+        # a = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_ClientState']").get_attribute("value")
+        # print(a)
+        # print(type(a))
+        # if "102 LE QUOC HUNG" in a:
+        #     print("'102 LE QUOC HUNG' in a")
+
+
+        # driver.find_element_by_xpath(
+        #     "//div[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown']")\
+        #     .send_keys(Keys.ARROW_DOWN + Keys.ARROW_DOWN + Keys.RETURN)
+
+        # driver.find_element_by_xpath(
+        #     "//div[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown']//td[contains(text(), ' NVLinh_NLBang (ĐC)')]").click()
+
+        # driver.find_element_by_xpath(
+        #     "//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']").click()
+
+
+
+        # from selenium.webdriver.common.keys import Keys
+        # from selenium.webdriver import ActionChains
+        # # dropdown = driver.find_element_by_xpath(
+        # #     "//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_Input']")
+        # selection = driver.find_element_by_xpath(
+        #     # "//li[@class='rcbItem']//tr[td='90 BEN VAN DON']")
+        #     "//div[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown']//td[contains(text(), ' NVLinh_NLBang (ĐC)')]")
+        #     # "//div[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown']//td[contains(text(), '90 BEN VAN DON')]")
+        # actions = ActionChains(driver).move_to_element(selection)
+        #                               .send_keys(Keys.ARROW_DOWN)\
+        #                               .send_keys(Keys.ARROW_DOWN)\
+        #                               .send_keys(Keys.ARROW_DOWN)
+        # .click()
+
+    # actions = ActionChains(driver).click(dropdown).send_keys('65 BEN VAN DON')
+    # # actions = ActionChains(driver).click(dropdown).click(selection).send_keys(Keys.ENTER)
+    #                               # .send_keys(Keys.ARROW_DOWN).send_keys(Keys.ARROW_UP)\
+    #                               # .send_keys(Keys.RETURN)
+    # actions.perform()
+
+    # from selenium.webdriver.common.keys import Keys
+    # element = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_dtmStart_dateInput']").send_keys(Keys.SHIFT + Keys.TAB)
+
+
+
+    # from selenium.webdriver.support.ui import Select
+    # select_obj = Select(driver.find_element_by_xpath("//div[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown']"))
+    # select_obj.select_by_visible_text('400 NGUYEN VAN LINH')
+
+
+    # driver.find_element_by_xpath(
+    #     "//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_ClientState']").click()
+
+    # driver.find_element_by_xpath(
+    #     "//div[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown']/div[@class='rcbScroll rcbWidth']/td[text()=' 90 BEN VAN DON']").click()
+
+    # find_element_by_xpath("//select[@id='numReturnSelect']/option[text()='15000']").click()
+    # find_element_by_xpath("//select[@id='numReturnSelect']/option[@value='15000']").click()
+
+    # // *[ @ id = "ctl00_ContentPlaceHolder1_ucDailyReportConsumer_cboSites_DropDown"] / div[2] / ul / li[
+    #     7] / table / tbody / tr / td[1]
+
+    time.sleep(3)
+
+
+    # element = driver.find_element_by_xpath("//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_btnView_input']")
+    # element.click()
+    #
+    # wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_ucDailyReportConsumer_grv_ctl00")))
+
 
     # driver.maximize_window()
     driver.save_screenshot('screen_shoot.png')
