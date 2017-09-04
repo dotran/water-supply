@@ -21,8 +21,8 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " + \
              "AppleWebKit/537.36 (KHTML, like Gecko) " + \
              "Chrome/55.0.2883.87 Safari/537.36"
 
-URL_LOGIN = "http://datalogger.capnuocnhabe.vn"
-# URL_LOGIN = "http://113.161.69.85:1802/Login.aspx"
+# URL_LOGIN = "http://datalogger.capnuocnhabe.vn"
+URL_LOGIN = "http://113.161.69.85:1802/Login.aspx"
 ACCOUNT = {'id': "sawaco", 'pw': "123456"}
 URL_LOGGER = "http://113.161.69.85:1802/Consumer/Logger/Daily_Monthly.aspx"
 START_DATE = '01/09/2017'
@@ -61,9 +61,37 @@ XNTD = ["39 Ben Van Don",
 XNTD = ["102 LE QUOC HUNG"]
 
 
+class Timer(object):
+    """A simple facility to measure duration from the previous timing.
+
+    Init:       timer = Timer()
+    Measure:    timer("Something has done")
+    Output:     Something has done in x.x sec.
+    """
+
+    def __init__(self):
+        self.log = time.time()
+
+    def __call__(self, msg=None):
+        if not msg:
+            self._save_clock()
+            return
+        print("{} in {:.1f} sec.".format(msg, self._until_now()))
+
+    def _save_clock(self):
+        self.log = time.time()
+
+    def _until_now(self):
+        interval = time.time() - self.log
+        self._save_clock()
+        return interval
+
+
 def site_log_in(driver, account):
+    timer = Timer()
     wait = WebDriverWait(driver, 10)
     wait.until(EC.presence_of_element_located((By.ID, "ContentPlaceHolder1_ucLogin1_Login1_LoginButton")))
+    timer("Login page loaded")
 
     # METHOD 1
     # --------
@@ -96,6 +124,7 @@ def site_log_in(driver, account):
 
     wait.until(EC.presence_of_all_elements_located((By.ID, "RAD_SLIDING_PANE_TEXT_RadSlidingPane2")))
     driver.maximize_window()
+    timer("Logged in successfully")
 
 
 def get_locations_list(driver):
@@ -161,6 +190,7 @@ def select_a_location(driver, list_length, location):
 
 
 class TableWait(object):
+
     def __init__(self, driver, timeout=10):
         self.driver = driver
         self.timeout = timeout
@@ -205,10 +235,6 @@ def wait_for(condition_function, timeout):
     raise Exception("Timeout {} sec waiting for {}.".format(timeout, condition_function.__name__))
     # print("  Timeout waiting for table update.")
     # return False
-
-
-def scrape_table_per_location(driver):
-    print("Inside of scrape_table_per_location()")
 
 
 def main():
