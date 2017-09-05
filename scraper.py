@@ -125,12 +125,14 @@ def site_log_in(driver, account):
     wait.until(EC.presence_of_all_elements_located((By.ID, "RAD_SLIDING_PANE_TEXT_RadSlidingPane2")))
     driver.maximize_window()
     timer("Logged in successfully")
+    print('')
 
 
 def get_locations_list(driver):
     """Return the list of all locations/meters available in the dropdown.
     """
-    elem = rewind_dropdown_list(driver, 1)
+    timer = Timer()
+    elem = rewind_dropdown_list(driver)
     locations = []
     while True:
         loc = get_highlighted_location(driver)
@@ -138,7 +140,9 @@ def get_locations_list(driver):
             break
         locations.append(loc)
         elem.send_keys(Keys.ARROW_DOWN + Keys.ENTER)
+    timer("Went through all locations/meters")
     rewind_dropdown_list(elem, len(locations))
+    timer("Done rewinding the dropdown list")
     return locations
 
 
@@ -157,7 +161,7 @@ def get_highlighted_location(driver):
     return {'value': val, 'text': text}
 
 
-def rewind_dropdown_list(driver, num_steps):
+def rewind_dropdown_list(driver, num_steps=1):
     """Go to the beginning of the dropdown list.
     """
     element = driver.find_element_by_xpath(
@@ -173,6 +177,7 @@ def rewind_dropdown_list(driver, num_steps):
 def select_a_location(driver, list_length, location):
     """Select a location/meter from the dropdown list.
     """
+    timer = Timer()
     elem = rewind_dropdown_list(driver, list_length)
     elem.click()
 
@@ -182,14 +187,21 @@ def select_a_location(driver, list_length, location):
         # print(current_loc)
         if current_loc == previous_loc:
             print("Couldn't find the requested location/meter.")
+            timer("Failed")
             return False
         if location in current_loc.values():
+            timer("Succeeded")
             return True
         previous_loc = current_loc
         elem.send_keys(Keys.ARROW_DOWN + Keys.ENTER)
 
 
 class TableWait(object):
+    """Wait for data logger table to be loaded or updated.
+
+    Usage:  with TableWait(driver, timeout=30):
+                pass
+    """
 
     def __init__(self, driver, timeout=10):
         self.driver = driver
@@ -203,9 +215,10 @@ class TableWait(object):
             self.begin = False
             self.old_table = tables[0]
 
-        # Click on the Xem button
+        # Click on the "Xem" button
         self.driver.find_element_by_xpath(
             "//input[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_btnView_input']").click()
+        print("Waiting for the table ...")
 
     def __exit__(self, *_):
         if self.begin:
@@ -225,6 +238,10 @@ class TableWait(object):
 
 
 def wait_for(condition_function, timeout):
+    """Waiting for some external condition function returning True.
+
+    This is a general implementation with condition_function() could be of any kind.
+    """
     start_time = time.time()
     while time.time() < start_time + timeout:
         if condition_function():
@@ -270,10 +287,9 @@ def main():
             print("** '{}' not found.".format(loc))
             continue
         if select_a_location(driver, len(locations), loc):
-            print("OK.")
-            table_wait = TableWait(driver, timeout=30)
+            # print("OK.")
             try:
-                with table_wait:
+                with TableWait(driver, timeout=30):
                     pass
             except Exception as msg:
                 print("** Omitting '{}': {}".format(str(loc), msg))
