@@ -140,9 +140,8 @@ def get_locations_list(driver):
             break
         locations.append(loc)
         elem.send_keys(Keys.ARROW_DOWN + Keys.ENTER)
-    timer("Went through all locations/meters")
     rewind_dropdown_list(elem, len(locations))
-    timer("Done rewinding the dropdown list")
+    timer("Done collecting locations/meters list")
     return locations
 
 
@@ -287,7 +286,6 @@ def main():
             print("** '{}' not found.".format(loc))
             continue
         if select_a_location(driver, len(locations), loc):
-            # print("OK.")
             try:
                 with TableWait(driver, timeout=30):
                     pass
