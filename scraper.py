@@ -27,31 +27,31 @@ ACCOUNT = {'id': "sawaco", 'pw': "123456"}
 URL_LOGGER = "http://113.161.69.85:1802/Consumer/Logger/Daily_Monthly.aspx"
 START_DATE = '01/09/2016'
 END_DATE   = '08/09/2017'
-XNTD = ["39 Ben Van Don",
-        "65 BEN VAN DON",
-        "90 BEN VAN DON",
-        "BEN VAN DON_NGUYEN KHOAI",
-        "CALMETTE - BEN VAN DON",
-        "CAU HIEP PHUOC",
-        "CAU RACH ONG 1",
-        "Cau Rach Ong 2",
-        "CAU TAC BEN RO",
-        "CTY PT CN TAN THUAN",
-        "D1000 Huynh Tan Phat",
-        "D300 Cau Ba Chiem",
-        "D600 Cau Ong Lon",
-        "D600 NVLinh_NHTho",
-        "KCN HIEP PHUOC",
-        "KCX TThuan",
-        "LONG THOI - NHON DUC",
-        "NGUYEN BINH",
-        "NHTho_PHLau",
-        "NVLinh_NLBang",
-        "VUON UOM BOO",
+XNTD = [#"39 Ben Van Don",
+        # "65 BEN VAN DON",
+        # "90 BEN VAN DON",
+        # "BEN VAN DON_NGUYEN KHOAI",
+        # "CALMETTE - BEN VAN DON",
+        # "CAU HIEP PHUOC",
+        # "CAU RACH ONG 1",
+        # "Cau Rach Ong 2",
+        # "CAU TAC BEN RO",
+        # "CTY PT CN TAN THUAN",
+        # "D1000 Huynh Tan Phat",
+        # "D300 Cau Ba Chiem",
+        # "D600 Cau Ong Lon",
+        # "D600 NVLinh_NHTho",
+        # "KCN HIEP PHUOC",
+        # "KCX TThuan",
+        # "LONG THOI - NHON DUC",
+        # "NGUYEN BINH",
+        # "NHTho_PHLau",
+        # "NVLinh_NLBang",
+        # "VUON UOM BOO",
         "Vuon uom Tan Thuan",
-        "D1000 Huynh Tan Phat (ÐC)",
+        # "D1000 Huynh Tan Phat (ÐC)",
         "D300 Cau Ba Chiem (ÐC)",
-        "D600 NVLinh_NHTho (ÐC)",
+        # "D600 NVLinh_NHTho (ÐC)",
         "NHTho_PHLau (ÐC)",
         "NVLinh_NLBang (ÐC)",
         "Vuon uom BOO (ÐC)",
@@ -340,7 +340,7 @@ def main():
             continue
         if select_a_location(driver, len(locations), loc):
             try:
-                with TableWait(driver, timeout=60):
+                with TableWait(driver, timeout=90):
                     pass
             except Exception as msg:
                 print("** Omitting '{}': {}".format(loc, msg))
