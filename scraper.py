@@ -3,12 +3,12 @@
 
 import platform
 import time
-# from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import pandas as pd
 
 
 # Using the right PhantomJS for the corresponding OS
@@ -59,6 +59,7 @@ XNTD = ["39 Ben Van Don",
 ]
 
 XNTD = ["102 LE QUOC HUNG"]
+# XNTD = ["Vuon uom Tan Thuan (ÐC)"]
 
 
 class Timer(object):
@@ -253,6 +254,37 @@ def wait_for(condition_function, timeout):
     # return False
 
 
+def scrape_table_per_location(driver):
+    """Read daily-logger table on the current web page to a list.
+
+    Each sub-list corresponds to a row of the table.
+    The following columns are expected:
+    ["DATE", "LOCATION", "FLOW_MAX", "FLOW_AVG", "FLOW_MIN", "VOLUME",
+                         "PRESS_MAX", "PRESS_AVG", "PRESS_MIN"]
+    """
+    from bs4 import BeautifulSoup
+
+    RETAINED_COLUMNS = (0, 1, 3, 4, 5, 6, 8, 9, 10)  # columns of interest, from R
+
+    # tbody_elem = driver.find_element_by_xpath("//table[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_grv_ctl00']/tbody")
+    # tbody_src = tbody_elem.get_attribute('innerHTML')
+    # soup = BeautifulSoup(tbody_src, 'html.parser')
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    soup = soup.find("table", attrs={"class": "rgMasterTable"})
+
+    table = []
+    for tr in soup.find_all('tr'):
+        row = [td.get_text() for td in tr.find_all('td')]
+        if len(row) < len(RETAINED_COLUMNS):
+            continue
+        row = [t.replace('\n', '').strip() for t in row]  # stripping
+        row = [row[i] for i in RETAINED_COLUMNS]
+        table.append(row)
+
+    return table
+
+
 def main():
     # Use PhantomJS to browse the page
     caps = webdriver.DesiredCapabilities.PHANTOMJS
@@ -290,9 +322,30 @@ def main():
                 with TableWait(driver, timeout=30):
                     pass
             except Exception as msg:
-                print("** Omitting '{}': {}".format(str(loc), msg))
+                print("** Omitting '{}': {}".format(loc, msg))
                 continue
             driver.save_screenshot('screenshoot_{}_{}.png'.format(i, loc))
+
+            timer = Timer()
+            table = scrape_table_per_location(driver)
+            timer("Done scraping table to df")
+
+            # DAILY_LOG_HEADER = ["DATE", "LOCATION", "FLOW_MAX", "FLOW_AVG", "FLOW_MIN",
+            #                     "VOLUME", "PRESS_MAX", "PRESS_AVG", "PRESS_MIN"]
+            DAILY_LOG_HEADER = ["date", "location", "flow_max", "flow_avg", "flow_min",
+                                "volume", "press_max", "press_avg", "press_min"]
+            idxname = DAILY_LOG_HEADER[0]
+            df = pd.DataFrame(table, columns=DAILY_LOG_HEADER)
+            df[idxname] = pd.to_datetime(df[idxname], dayfirst=True).dt.date
+            df = df.set_index(idxname)
+
+            filename = "daily__{}__{}__{}.csv".format(loc,
+                                                      df.index.min().strftime("%Y-%m-%d"),
+                                                      df.index.max().strftime("%Y-%m-%d"))
+            df.to_csv(filename, encoding='utf-8')
+            timer("Done writing df to csv")
+            df2 = pd.read_csv(filename, index_col=idxname, encoding='utf-8')
+            timer("Done re-reading csv to df")
 
             element = driver.find_element_by_xpath(
                 "//*[@id='ctl00_ContentPlaceHolder1_ucDailyReportConsumer_grv_ctl00__0']/td[2]")
