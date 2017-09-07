@@ -25,40 +25,40 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " + \
 URL_LOGIN = "http://113.161.69.85:1802/Login.aspx"
 ACCOUNT = {'id': "sawaco", 'pw': "123456"}
 URL_LOGGER = "http://113.161.69.85:1802/Consumer/Logger/Daily_Monthly.aspx"
-START_DATE = '01/09/2017'
-END_DATE   = '05/09/2017'
+START_DATE = '01/09/2016'
+END_DATE   = '08/09/2017'
 XNTD = ["39 Ben Van Don",
         "65 BEN VAN DON",
-        # "90 BEN VAN DON",
-        # "BEN VAN DON_NGUYEN KHOAI",
-        # "CALMETTE - BEN VAN DON",
-        # "CAU HIEP PHUOC",
-        # "CAU RACH ONG 1",
-        # "Cau Rach Ong 2",
-        # "CAU TAC BEN RO",
-        # "CTY PT CN TAN THUAN",
-        # "D1000 Huynh Tan Phat",
-        # "D300 Cau Ba Chiem",
-        # "D600 Cau Ong Lon",
-        # "D600 NVLinh_NHTho",
-        # "KCN HIEP PHUOC",
-        # "KCX TThuan",
-        # "LONG THOI - NHON DUC",
-        # "NGUYEN BINH",
-        # "NHTho_PHLau",
-        # "NVLinh_NLBang",
+        "90 BEN VAN DON",
+        "BEN VAN DON_NGUYEN KHOAI",
+        "CALMETTE - BEN VAN DON",
+        "CAU HIEP PHUOC",
+        "CAU RACH ONG 1",
+        "Cau Rach Ong 2",
+        "CAU TAC BEN RO",
+        "CTY PT CN TAN THUAN",
+        "D1000 Huynh Tan Phat",
+        "D300 Cau Ba Chiem",
+        "D600 Cau Ong Lon",
+        "D600 NVLinh_NHTho",
+        "KCN HIEP PHUOC",
+        "KCX TThuan",
+        "LONG THOI - NHON DUC",
+        "NGUYEN BINH",
+        "NHTho_PHLau",
+        "NVLinh_NLBang",
         "VUON UOM BOO",
-        # "Vuon uom Tan Thuan",
+        "Vuon uom Tan Thuan",
         "D1000 Huynh Tan Phat (ÐC)",
-        # "D300 Cau Ba Chiem (ÐC)",
-        # "D600 NVLinh_NHTho (ÐC)",
-        # "NHTho_PHLau (ÐC)",
-        # "NVLinh_NLBang (ÐC)",
-        # "Vuon uom BOO (ÐC)",
-        # "Vuon uom Tan Thuan (ÐC)",
+        "D300 Cau Ba Chiem (ÐC)",
+        "D600 NVLinh_NHTho (ÐC)",
+        "NHTho_PHLau (ÐC)",
+        "NVLinh_NLBang (ÐC)",
+        "Vuon uom BOO (ÐC)",
+        "Vuon uom Tan Thuan (ÐC)",
 ]
 
-XNTD = ["102 LE QUOC HUNG"]
+# XNTD = ["102 LE QUOC HUNG"]
 # XNTD = ["Vuon uom Tan Thuan (ÐC)"]
 
 
@@ -158,7 +158,29 @@ def get_highlighted_location(driver):
         .get_attribute("value")
     val = value.split(',')[1].split(':')[1].strip('"')
     text = value.split(',')[2].split(':')[1].strip('"')
-    return {'value': val, 'text': text}
+    return {'value': val,
+            'text': text,
+            'value_ascii': normalize_to_ascii(val),
+            'text_ascii': normalize_to_ascii(text)}
+
+
+def normalize_to_ascii(input_str):
+    import unicodedata
+    output_str = input_str.replace('Đ', 'D')\
+                          .replace('Ð', 'D')\
+                          .replace('Ễ', 'E')\
+                          .replace('Ì', 'I')
+    s = unicodedata.normalize('NFKD', output_str).encode('ASCII', 'ignore')
+    output_str = s.decode()
+    return output_str
+
+
+def is_recognized_in(locations, loc):
+    if loc in [item['value'] for item in locations] or \
+       loc in [item['text'] for item in locations] or \
+       loc in [item['value_ascii'] for item in locations] or \
+       loc in [item['text_ascii'] for item in locations]:
+        return True
 
 
 def rewind_dropdown_list(driver, num_steps=1):
@@ -313,13 +335,12 @@ def main():
 
     for i, loc in enumerate(XNTD):
         print("\nLocating '{}' ...".format(loc))
-        if loc not in [item['value'] for item in locations] and \
-                loc not in [item['text'] for item in locations]:
+        if not is_recognized_in(locations, loc):
             print("** '{}' not found.".format(loc))
             continue
         if select_a_location(driver, len(locations), loc):
             try:
-                with TableWait(driver, timeout=30):
+                with TableWait(driver, timeout=60):
                     pass
             except Exception as msg:
                 print("** Omitting '{}': {}".format(loc, msg))
@@ -339,7 +360,7 @@ def main():
             df[idxname] = pd.to_datetime(df[idxname], dayfirst=True).dt.date
             df = df.set_index(idxname)
 
-            filename = "daily__{}__{}__{}.csv".format(loc,
+            filename = "daily__{}__{}__{}.csv".format(normalize_to_ascii(loc),
                                                       df.index.min().strftime("%Y-%m-%d"),
                                                       df.index.max().strftime("%Y-%m-%d"))
             df.to_csv(filename, encoding='utf-8')
