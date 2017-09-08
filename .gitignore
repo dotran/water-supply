@@ -1,3 +1,8 @@
+# Local folders
+docs
+data
+screenshots
+
 # PyCharm
 .idea
 
